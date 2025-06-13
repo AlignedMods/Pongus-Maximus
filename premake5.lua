@@ -57,7 +57,7 @@ workspace "Pongus Maximus"
         language "C++"
 
         files {"src/**.cpp", "src/**.hpp"}
-        includedirs {"src/", "vendor/raylib/src"}
+        includedirs {"src/", "vendor/raylib/src", "vendor/json/include"}
 
         links {"raylib", "winmm", "gdi32"}
 

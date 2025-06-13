@@ -1,1 +1,3 @@
 -Ivendor/raylib/src
+-Isrc/
+-Ivendor/json/include

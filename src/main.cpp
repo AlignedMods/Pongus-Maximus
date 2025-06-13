@@ -1,23 +1,9 @@
-#include "test.hpp"
-#include "raylib.h"
+#include "Game.hpp"
 
 int main() {
-    InitWindow(800, 400, "Gonner game!");
+    Game game;
+    game.Run();
 
-    SetTargetFPS(60);
-
-    while (!WindowShouldClose()) {
-        BeginDrawing();
-
-        ClearBackground(RAYWHITE);
-        DrawRectangle(100, 200, 300, 100, RED);
-
-        DrawText("good boy :3", 200, 50, 30, BLACK);
-
-        EndDrawing();
-    }
-
-    CloseWindow();
-
+    // not needed but i like having this here
     return 0;
 }
