@@ -9,28 +9,37 @@ ifndef verbose
 endif
 
 ifeq ($(config),debug)
+  raylib_config = debug
   Pongus_Maximus_config = debug
 
 else ifeq ($(config),release)
+  raylib_config = release
   Pongus_Maximus_config = release
 
 else
   $(error "invalid configuration $(config)")
 endif
 
-PROJECTS := Pongus_Maximus
+PROJECTS := raylib Pongus_Maximus
 
 .PHONY: all clean help $(PROJECTS) 
 
 all: $(PROJECTS)
 
-Pongus_Maximus:
+raylib:
+ifneq (,$(raylib_config))
+	@echo "==== Building raylib ($(raylib_config)) ===="
+	@${MAKE} --no-print-directory -C libs -f Makefile config=$(raylib_config)
+endif
+
+Pongus_Maximus: raylib
 ifneq (,$(Pongus_Maximus_config))
 	@echo "==== Building Pongus_Maximus ($(Pongus_Maximus_config)) ===="
 	@${MAKE} --no-print-directory -C build -f Makefile config=$(Pongus_Maximus_config)
 endif
 
 clean:
+	@${MAKE} --no-print-directory -C libs -f Makefile clean
 	@${MAKE} --no-print-directory -C build -f Makefile clean
 
 help:
@@ -43,6 +52,7 @@ help:
 	@echo "TARGETS:"
 	@echo "   all (default)"
 	@echo "   clean"
+	@echo "   raylib"
 	@echo "   Pongus_Maximus"
 	@echo ""
 	@echo "For more information, see https://github.com/premake/premake-core/wiki"
