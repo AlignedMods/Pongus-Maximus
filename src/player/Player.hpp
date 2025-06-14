@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ball/Ball.hpp"
 #include "raylib.h"
 #include <string>
 #include <unordered_map>

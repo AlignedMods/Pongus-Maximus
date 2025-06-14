@@ -55,6 +55,7 @@ workspace "Pongus Maximus"
     project "Pongus_Maximus"
         location "build/"
         language "C++"
+        cppdialect "C++20"
 
         files {"src/**.cpp", "src/**.hpp"}
         includedirs {"src/", "vendor/raylib/src", "vendor/json/include"}

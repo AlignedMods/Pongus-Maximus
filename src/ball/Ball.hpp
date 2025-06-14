@@ -1,5 +1,6 @@
 #pragma once
 
+#include "player/Player.hpp"
 #include "raylib.h"
 
 class Ball {
@@ -11,6 +12,10 @@ public:
     void OnUpdate();
 
     void Reset();
+
+    Vector2& GetVelocity();
+
+    friend class Player;
 
 private:
     Vector2 m_Position;

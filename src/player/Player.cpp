@@ -30,7 +30,10 @@ Player::Player(PlayerType type) {
             break;
         }
 
-        default: {
+        case PlayerType::Bot: {
+            keys["up"] = KEY_NULL;
+            keys["down"] = KEY_NULL;
+
             m_Position = { Game::Get()->GetWindowWidth() - 10.0f - m_Size.x, Game::Get()->GetWindowHeight() / 2.0f - m_Size.y / 2.0f};
             break;
         }
@@ -46,47 +49,37 @@ Player::~Player() {
 }
 
 void Player::OnUpdate() {
-    switch (m_Type) {
-        case PlayerType::Player1: {
-            if (IsKeyDown(KEY_S)) {
-                m_Velocity.y = std::min(m_Velocity.y + 1.0f, 5.0f);
-            } else if (IsKeyDown(KEY_W)) {
-                m_Velocity.y = std::max(m_Velocity.y - 1.0f, -5.0f);
-            } else {
-                if (m_Velocity.y > 0.0f) {
-                    m_Velocity.y -= 0.5f;
-                } else if (m_Velocity.y < 0.0f) {
-                    m_Velocity.y += 0.5f;
-                }
+    //std::cout << (int)m_Type << '\n';
+
+    if (m_Type == PlayerType::Player1 || m_Type == PlayerType::Player2) {
+        if (IsKeyDown(keys.at("down"))) {
+            m_Velocity.y = std::min(m_Velocity.y + 1.0f, 5.0f);
+        } else if (IsKeyDown(keys.at("up"))) {
+            m_Velocity.y = std::max(m_Velocity.y - 1.0f, -5.0f);
+        } else {
+            if (m_Velocity.y > 0.0f) {
+                m_Velocity.y -= 0.5f;
+            } else if (m_Velocity.y < 0.0f) {
+                m_Velocity.y += 0.5f;
             }
-
-            break;
         }
-
-        case PlayerType::Player2: {
-            if (IsKeyDown(KEY_DOWN)) {
-                m_Velocity.y = std::min(m_Velocity.y + 1.0f, 5.0f);
-            } else if (IsKeyDown(KEY_UP)) {
-                m_Velocity.y = std::max(m_Velocity.y - 1.0f, -5.0f);
-            } else {
-                if (m_Velocity.y > 0.0f) {
-                    m_Velocity.y -= 0.5f;
-                } else if (m_Velocity.y < 0.0f) {
-                    m_Velocity.y += 0.5f;
-                }
+    } else if (m_Type == PlayerType::Bot) {
+        if (Game::Get()->ball->m_Position.y > m_Position.y) {
+            m_Velocity.y = std::min(m_Velocity.y + 1.0f, 5.0f);
+        } else if (Game::Get()->ball->m_Position.y < m_Position.y) {
+            m_Velocity.y = std::max(m_Velocity.y - 1.0f, -5.0f);
+        } else {
+            if (m_Velocity.y > 0.0f) {
+                m_Velocity.y -= 0.5f;
+            } else if (m_Velocity.y < 0.0f) {
+                m_Velocity.y += 0.5f;
             }
-
-            break;
-        }
-
-        default: {
-            std::cout << "idk";
         }
     }
 
-    if (m_Position.y < 0.0f && !IsKeyDown(keys["down"])) {
+    if (m_Position.y < 0.0f && m_Velocity.y < 0.0f) {
         
-    } else if (m_Position.y + m_Size.y > GetScreenHeight() && !IsKeyDown(keys["up"])) {
+    } else if (m_Position.y + m_Size.y > GetScreenHeight() && m_Velocity.y > 0.0f) {
 
     } else {
         m_Position = Vector2Add(m_Position, m_Velocity);

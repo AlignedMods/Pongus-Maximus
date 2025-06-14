@@ -1,3 +1,4 @@
 -Ivendor/raylib/src
 -Isrc/
 -Ivendor/json/include
+-std=c++20
