@@ -4,7 +4,6 @@
 
 #include "Game.hpp"
 #include <algorithm>
-#include <iostream>
 
 Player::Player(PlayerType type) {
     m_Size = {20.0f, 80.0f};
@@ -53,36 +52,32 @@ void Player::OnUpdate() {
 
     if (m_Type == PlayerType::Player1 || m_Type == PlayerType::Player2) {
         if (IsKeyDown(keys.at("down"))) {
-            m_Velocity.y = std::min(m_Velocity.y + 1.0f, 5.0f);
+            m_Velocity.y = std::min(m_Velocity.y + 60.0f, 300.0f);
         } else if (IsKeyDown(keys.at("up"))) {
-            m_Velocity.y = std::max(m_Velocity.y - 1.0f, -5.0f);
+            m_Velocity.y = std::max(m_Velocity.y - 60.0f, -300.0f);
         } else {
             if (m_Velocity.y > 0.0f) {
-                m_Velocity.y -= 0.5f;
+                m_Velocity.y -= 30.0f;
             } else if (m_Velocity.y < 0.0f) {
-                m_Velocity.y += 0.5f;
+                m_Velocity.y += 30.0f;
             }
         }
     } else if (m_Type == PlayerType::Bot) {
         if (Game::Get()->ball->m_Position.y > m_Position.y) {
-            m_Velocity.y = std::min(m_Velocity.y + 1.0f, 5.0f);
+            m_Velocity.y = std::min(m_Velocity.y + 60.0f, 300.0f);
         } else if (Game::Get()->ball->m_Position.y < m_Position.y) {
-            m_Velocity.y = std::max(m_Velocity.y - 1.0f, -5.0f);
+            m_Velocity.y = std::max(m_Velocity.y - 60.0f, -300.0f);
         } else {
             if (m_Velocity.y > 0.0f) {
-                m_Velocity.y -= 0.5f;
+                m_Velocity.y -= 30.0f;
             } else if (m_Velocity.y < 0.0f) {
-                m_Velocity.y += 0.5f;
+                m_Velocity.y += 30.0f;
             }
         }
     }
 
-    if (m_Position.y < 0.0f && m_Velocity.y < 0.0f) {
-        
-    } else if (m_Position.y + m_Size.y > GetScreenHeight() && m_Velocity.y > 0.0f) {
-
-    } else {
-        m_Position = Vector2Add(m_Position, m_Velocity);
+    if ( ( !(m_Position.y < 0.0f && m_Velocity.y < 0.0f) && !(m_Position.y + m_Size.y > GetScreenHeight() && m_Velocity.y > 0.0f) ) ) {
+        m_Position = Vector2Add(m_Position, Vector2Multiply(m_Velocity, { Game::Get()->deltaTime, Game::Get()->deltaTime }));
     }
 
     rectangle = {m_Position.x, m_Position.y, m_Size.x, m_Size.y};

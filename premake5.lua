@@ -44,7 +44,7 @@ workspace "Pongus Maximus"
             links { "opengl32", "winmm", "gdi32", "shell32" }
 
         filter { "system:linux" }
-            defines { "PLATFORM_DESKTOP", "GRAPHICS_API_OPENGL_33" }
+            defines { "PLATFORM_DESKTOP", "GRAPHICS_API_OPENGL_33", "_GLFW_X11" }
             links { "GL", "X11", "pthread", "m", "dl" }
 
         filter { "system:macosx" }
@@ -60,6 +60,10 @@ workspace "Pongus Maximus"
         files {"src/**.cpp", "src/**.hpp"}
         includedirs {"src/", "vendor/raylib/src", "vendor/json/include"}
 
-        links {"raylib", "winmm", "gdi32"}
+	filter "system:windows"
+	    links {"raylib", "winmm", "gdi32"}
+
+	filter "system:linux"
+	    links {"raylib"}
 
     

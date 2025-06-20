@@ -1,0 +1,1 @@
+NOTE: Before compiling the game make sure to uncomment the "CUSTOM FRAME CONTROL" macro in the "config.h" file in 'vendor/raylib/src'!

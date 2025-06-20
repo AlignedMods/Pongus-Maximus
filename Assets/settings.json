@@ -1,4 +1,8 @@
 {
     "PaddleColor": "0xcf7ceb",
-    "BallColor": "0x00ff00"
+    "BallColor": "0x00ff00",
+
+    "fps": 144,
+
+    "BackgroundMusic": "Assets/audio/music.wav"
 }

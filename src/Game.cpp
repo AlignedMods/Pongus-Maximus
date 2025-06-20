@@ -1,18 +1,21 @@
 #include "Game.hpp"
 #include "ball/Ball.hpp"
 #include "menu/Menu.hpp"
+#include "menu/menus/MainMenu.hpp"
+#include "nlohmann/json.hpp"
 #include "player/Player.hpp"
 #include "utils/Utils.hpp"
-#include "nlohmann/json.hpp"
 
-#include "raylib.h"
 #include <cstdint>
-#include <format>
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <ios>
-#include <string>
+#include <iostream>
+#include <memory>
 #include <sstream>
+#include <string>
+#include "raylib.h"
 
 // ᶠʳᵉᵃᵏʸ code
 
@@ -28,17 +31,32 @@ Game::Game() {
 
 Game::~Game() {
     delete ball;
-    delete m_Menu;
 
+    CloseAudioDevice();
     CloseWindow();
 }
 
 void Game::Loop() {
     ball = new Ball();
-    m_Menu = new Menu();
+
+    m_Menu = std::make_shared<MainMenu>();
+
+    m_CurrentTime = 0.0;
+    m_PreviousTime = GetTime();
+    m_DrawUpdateTime = 0.0;
+    m_WaitTime = 0.0;
+
+    PlayMusicStream(settings.BackgroundMusic);
 
     while (!WindowShouldClose() && m_Existing) {
-        std::cout << m_PvpModeSet << '\n';
+        UpdateMusicStream(settings.BackgroundMusic);
+
+        PollInputEvents();
+
+        if (IsKeyPressed(KEY_ESCAPE)) {
+            isRunning = false;
+            SetCurrentMenu<MainMenu>();
+        }
 
         if (m_Pvp && !m_PvpModeSet && m_ShouldSetPvp) {
             std::cout << "Making pvp";
@@ -63,7 +81,7 @@ void Game::Loop() {
             }
 
             ball->OnUpdate();
-        } 
+        }
 
         BeginDrawing();
 
@@ -83,19 +101,46 @@ void Game::Loop() {
         int s1Size = MeasureText(score1.c_str(), 50);
         int s2Size = MeasureText(score2.c_str(), 50);
 
-        DrawText(score1.c_str(), GetScreenWidth() / 4 - s1Size / 2, 0, 50, BLACK);
-        DrawText(score2.c_str(), GetScreenWidth() / 4 * 3 - s2Size / 2, 0, 50, BLACK);
+        DrawText(score1.c_str(), GetScreenWidth() / 4 - s1Size / 2, 0, 50,
+                 BLACK);
+        DrawText(score2.c_str(), GetScreenWidth() / 4 * 3 - s2Size / 2, 0, 50,
+                 BLACK);
 
         if (!isRunning) {
             m_Menu->OnRender();
         }
 
+        float frames = 1.0f / deltaTime;
+
+        DrawText(TextFormat("FPS: %.1f", Round(frames)), 0, 0, 20, WHITE);
+
         EndDrawing();
+
+        SwapScreenBuffer();
+
+        m_CurrentTime = GetTime();
+        m_DrawUpdateTime = m_CurrentTime - m_PreviousTime;
+
+        if (settings.FPS > 0) {
+            m_WaitTime = (1.0f / settings.FPS) - m_DrawUpdateTime;
+
+            if (m_WaitTime > 0.0f) {
+                WaitTime(m_WaitTime);
+                m_CurrentTime = GetTime();
+                deltaTime = static_cast<float>(m_CurrentTime - m_PreviousTime);
+            } else {
+                deltaTime = m_DrawUpdateTime;
+            }
+
+            m_PreviousTime = m_CurrentTime;
+        }
     }
+
+    UnloadMusicStream(settings.BackgroundMusic);
 }
 
-void Game::IncrementScore(bool leftOrRight) {
-    if (leftOrRight == false) {
+void Game::IncrementScore(Direction side) {
+    if (side == Direction::Left) {
         m_Score.x += 1;
     } else {
         m_Score.y += 1;
@@ -119,13 +164,21 @@ void Game::LoadSettingsFromFile(const std::filesystem::path& filePath) {
     s1.clear();
 
     s1 = jsonFile.at("BallColor");
-    s1.append("ff"); // this is here so the transparency isn't 0
+    s1.append("ff");  // this is here so the transparency isn't 0
     str << s1;
     uint32_t ballColor;
     str >> std::hex >> ballColor;
 
+    str.clear();
+    s1.clear();
+
+    std::string backgroundMusic = jsonFile.at("BackgroundMusic");
+
+    settings.FPS = jsonFile.at("fps");
     settings.PaddleColor = GetColor(paddleColor);
     settings.BallColor = GetColor(ballColor);
+
+    settings.BackgroundMusic = LoadMusicStream(backgroundMusic.c_str());
 }
 
 void Game::Quit() {
@@ -133,15 +186,18 @@ void Game::Quit() {
 }
 
 void Game::Run() {
+    SetConfigFlags(FLAG_MSAA_4X_HINT);
     InitWindow(m_WindowWidth, m_WindowHeight, "Pongus Maximus");
+
+    InitAudioDevice();
 
     SetExitKey(KEY_F8);
 
-    SetTargetFPS(60);
-
     LoadSettingsFromFile("Assets/settings.json");
 
-    settings.Background = LoadTexture("Assets/backdrop.png");
+    settings.Background = LoadTexture("Assets/textures/backdrop.png");
+
+    SetCurrentMenu<MainMenu>();
 
     Loop();
 }
@@ -162,4 +218,8 @@ void Game::StartGameplay(bool pvp) {
 
 Game* Game::Get() {
     return s_Instance;
+}
+
+uint32_t Foo(uint32_t bar) {
+    return 7 * bar;
 }
